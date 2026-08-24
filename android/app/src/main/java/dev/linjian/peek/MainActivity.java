@@ -30,7 +30,9 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.AlarmClock;
 import android.provider.Settings;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,7 +135,7 @@ public class MainActivity extends Activity {
         loadSettings();
         NowState.start(this);
 
-        DebugState.append(this, "掌心窗公开版 v0.3.7 已打开");
+        DebugState.append(this, "掌心窗公开版 v0.3.7.2 已打开");
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 13);
         serviceRunning = CompanionService.isRunning();
         updateUI();
@@ -169,6 +171,7 @@ public class MainActivity extends Activity {
         if (userNameInput != null) userNameInput.setOnFocusChangeListener((v, focused) -> { if (!focused) { saveSettings(); buildMagazinePages(); updateUI(); } });
         if (companionNameInput != null) companionNameInput.setOnFocusChangeListener((v, focused) -> { if (!focused) { saveSettings(); buildMagazinePages(); updateUI(); } });
         if (targetAppsInput != null) targetAppsInput.setOnFocusChangeListener((v, focused) -> { if (!focused) { saveSettings(); updateUI(); } });
+        bindConnectionAutoSave();
 
         bindThemeButton(themeCreamButton, "奶油绿"); bindThemeButton(themeBlueButton, "雾蓝白"); bindThemeButton(themePeachButton, "白桃粉"); bindThemeButton(themeNightButton, "夜航黑"); bindThemeButton(themeMintButton, "薄荷透明"); bindThemeButton(themePurpleButton, "星云紫");
 
@@ -1603,6 +1606,31 @@ public class MainActivity extends Activity {
         if (guidianReasonInput != null) guidianReasonInput.setText(prefs.getString(GuidianState.KEY_REASONS, GuidianState.defaultReasons()));
     }
 
+    private void bindConnectionAutoSave() {
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { saveConnectionSettingsOnly(false); }
+            @Override public void afterTextChanged(Editable s) { }
+        };
+        View.OnFocusChangeListener saveOnBlur = (v, focused) -> { if (!focused) saveConnectionSettingsOnly(true); };
+        if (serverUrl != null) { serverUrl.addTextChangedListener(watcher); serverUrl.setOnFocusChangeListener(saveOnBlur); }
+        if (tokenInput != null) { tokenInput.addTextChangedListener(watcher); tokenInput.setOnFocusChangeListener(saveOnBlur); }
+        if (deviceInput != null) { deviceInput.addTextChangedListener(watcher); deviceInput.setOnFocusChangeListener(saveOnBlur); }
+        if (intervalInput != null) { intervalInput.addTextChangedListener(watcher); intervalInput.setOnFocusChangeListener(saveOnBlur); }
+    }
+
+    private void saveConnectionSettingsOnly(boolean blocking) {
+        SharedPreferences.Editor e = getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit();
+        if (serverUrl != null) e.putString(AppPrefs.KEY_SERVER, serverUrl.getText().toString().trim());
+        if (tokenInput != null) e.putString(AppPrefs.KEY_TOKEN, tokenInput.getText().toString().trim());
+        if (deviceInput != null) {
+            String device = deviceInput.getText().toString().trim();
+            e.putString(AppPrefs.KEY_DEVICE, device.isEmpty() ? "android-phone" : device);
+        }
+        if (intervalInput != null) e.putInt(AppPrefs.KEY_INTERVAL, parseInterval(intervalInput.getText().toString().trim()));
+        if (blocking) e.commit(); else e.apply();
+    }
+
     private void saveSettings() {
         SharedPreferences.Editor e = getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit();
         if (serverUrl != null) e.putString(AppPrefs.KEY_SERVER, serverUrl.getText().toString().trim());
@@ -1997,7 +2025,8 @@ public class MainActivity extends Activity {
     private int dp(float v) { return (int) (v * getResources().getDisplayMetrics().density + 0.5f); }
 
     @Override protected void onResume() { super.onResume(); serviceRunning = CompanionService.isRunning(); updateUI(); if (recentlyOpenedAccessibilitySettings()) scheduleAccessibilityFollowupChecks(); uiHandler.removeCallbacks(refreshTick); uiHandler.post(refreshTick); }
-    @Override protected void onPause() { uiHandler.removeCallbacks(refreshTick); super.onPause(); }
+    @Override protected void onPause() { saveConnectionSettingsOnly(true); uiHandler.removeCallbacks(refreshTick); super.onPause(); }
+    @Override protected void onStop() { saveConnectionSettingsOnly(true); super.onStop(); }
 
     @Override public void onBackPressed() {
         if (diaryDateDrawerOverlay != null) { closeDiaryDateDrawer(null); return; }
@@ -2212,7 +2241,7 @@ public class MainActivity extends Activity {
         getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit().putBoolean("user_stopped", false).apply(); requestIgnoreBatteryOptimization();
         Intent intent = new Intent(this, CompanionService.class); intent.putExtra("server_url", url); intent.putExtra("token", token);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent); else startService(intent);
-        DebugState.append(this, "已请求启动前台服务：公开版 v0.3.7 右侧 love 线稿花枝已启用"); serviceRunning = true; updateUI();
+        DebugState.append(this, "已请求启动前台服务：公开版 v0.3.7.2 右侧 love 线稿花枝已启用"); serviceRunning = true; updateUI();
     }
 
     private void stopCompanionService() { getSharedPreferences(AppPrefs.PREFS, MODE_PRIVATE).edit().putBoolean("user_stopped", true).apply(); stopService(new Intent(this, CompanionService.class)); DebugState.append(this, "已停止服务"); serviceRunning = false; updateUI(); }

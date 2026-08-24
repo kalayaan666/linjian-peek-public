@@ -1,6 +1,13 @@
-# 掌心窗公开版 v0.3.7
+# 掌心窗公开版 v0.3.7.2
 
-## v0.3.7 日记与守护日历更新
+## v0.3.7.2 快速修复
+
+- 补充 `server/Dockerfile`、`.dockerignore` 与 `requirements.txt`，避免 Railway 在 server 服务构建阶段无法识别 Python 项目。Railway server 服务现在推荐：Root Directory=`server`，Build Command 留空，Start Command 留空，由 Dockerfile 启动 `python linjian_server.py`。
+
+- 修复网页端 MCP 管理器连接公开版 MCP 时的跨域响应头问题。
+- 设置页「连接设置」会自动保存服务器地址、Token、设备 ID 与轮询间隔，杀掉后台再打开也会保留。
+
+## v0.3.7.2 日记与守护日历更新
 
 - 守护日历事件补充稳定 ID，支持在日期详情卡中编辑、确认删除，并兼容没有 ID 的旧数据。
 - MCP 完善 `list_guardian_days`、`add_guardian_day`、`update_guardian_day`、`delete_guardian_day`。
@@ -76,15 +83,15 @@ update.json   版本更新信息
 
 1. 将源码包解压并覆盖到公开仓库根目录，确保 `.github`、`android`、`server`、`mcp` 位于根目录。
 2. 打开 GitHub 仓库 → **Actions** → **Build Android Public APK** → **Run workflow**。
-3. 构建成功后下载 `zhangxinchuang-public-v0.3.7-apk` artifact。
+3. 构建成功后下载 `zhangxinchuang-public-v0.3.7.2-apk` artifact。
 
 构建产物为：
 
 ```text
-android/Zhangxinchuang-public-v0.3.7.apk
+android/Zhangxinchuang-public-v0.3.7.2.apk
 ```
 
-版本名 `0.3.7`，版本码 `30700`。
+版本名 `0.3.7.2`，版本码 `30702`。
 
 ### 固定签名
 
@@ -146,8 +153,9 @@ Railway 的一键部署依赖 **Railway Template**。本仓库已经整理好 se
 ```text
 Service Name：server
 Root Directory：server
-Build Command：留空或 echo ok
-Start Command：python linjian_server.py
+Build Command：留空
+Start Command：留空
+Dockerfile Path：Dockerfile
 Healthcheck Path：/health
 Public Networking：开启 HTTP 域名
 ```
@@ -166,8 +174,8 @@ LINJIAN_DEFAULT_DEVICE=${{ shared.LINJIAN_DEFAULT_DEVICE }}
 ```text
 Service Name：mcp
 Root Directory：mcp
-Build Command：npm install
-Start Command：npm start
+Build Command：留空
+Start Command：pnpm start
 Healthcheck Path：/health
 Public Networking：开启 HTTP 域名
 ```
@@ -222,8 +230,9 @@ PY
 ```text
 服务名：server
 Root Directory：server
-Build Command：留空或 echo ok
-Start Command：python linjian_server.py
+Build Command：留空
+Start Command：留空
+Dockerfile Path：Dockerfile
 ```
 
 环境变量：
@@ -235,7 +244,7 @@ LINJIAN_KEEP=3
 LINJIAN_DEFAULT_DEVICE=android-phone
 ```
 
-注意：Railway 会自动提供 `PORT`，不要强行写死 `LINJIAN_PORT`。后端代码会优先读取 Railway 的 `PORT`。
+注意：Railway 会自动提供 `PORT`，不要强行写死 `LINJIAN_PORT`。后端代码会优先读取 Railway 的 `PORT`。server 目录已经内置 `Dockerfile`，Root Directory 设为 `server` 后，Railway 不需要再猜 Python 构建方式。
 
 部署完成后，给 server 服务生成公网域名，访问：
 
@@ -252,8 +261,8 @@ https://你的-server-域名/health
 ```text
 服务名：mcp
 Root Directory：mcp
-Build Command：npm install
-Start Command：npm start
+Build Command：留空
+Start Command：pnpm start
 ```
 
 环境变量：

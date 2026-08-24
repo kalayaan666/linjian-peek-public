@@ -1,4 +1,4 @@
-# 掌心窗公开版安装与部署流程（v0.3.7）
+# 掌心窗公开版安装与部署流程（v0.3.7.2）
 
 ## 1. 选择部署方式
 
@@ -60,8 +60,9 @@ Railway 服务设置：
 ```text
 Service Name: server
 Root Directory: server
-Build Command: 留空或 echo ok
-Start Command: python linjian_server.py
+Build Command: 留空
+Start Command: 留空
+Dockerfile Path: Dockerfile
 Healthcheck Path: /health
 ```
 
@@ -83,8 +84,8 @@ Railway 服务设置：
 ```text
 Service Name: mcp
 Root Directory: mcp
-Build Command: npm install
-Start Command: npm start
+Build Command: 留空
+Start Command: pnpm start
 Healthcheck Path: /health
 ```
 
@@ -151,7 +152,7 @@ http://127.0.0.1:8787/sse
 构建产物：
 
 ```text
-android/Zhangxinchuang-public-v0.3.7.apk
+android/Zhangxinchuang-public-v0.3.7.2.apk
 ```
 
 公开版使用固定签名 `android/signing/zhangxinchuang-public-release.p12`，不要删除或替换。

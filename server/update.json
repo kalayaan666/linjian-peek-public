@@ -1,10 +1,12 @@
 {
-  "latest_version_name": "0.3.7",
-  "latest_version_code": 30700,
-  "apk_url": "https://github.com/linzhi-524/linjian-peek-public/releases/download/v0.3.7/Zhangxinchuang-public-v0.3.7.apk",
+  "latest_version_name": "0.3.7.2",
+  "latest_version_code": 30702,
+  "apk_url": "https://github.com/linzhi-524/linjian-peek-public/releases/download/v0.3.7.2/Zhangxinchuang-public-v0.3.7.2.apk",
   "sha256": "",
   "required": false,
   "changelog": [
+    "修复网页端 MCP 管理器跨域连接问题，暴露 MCP-Session-Id、Mcp-Session-Id 与 WWW-Authenticate 响应头。",
+    "连接设置会自动保存服务器地址、Token、设备 ID 与轮询间隔，杀掉后台后重新打开无需重填。",
     "守护日历支持按稳定事件 ID 编辑和删除，同一天的其他事件不会受到影响。",
     "新增本机保存的“TA 的日记”，包含纸质日记页、左侧日期抽屉、搜索、封面和备份。",
     "日记正文默认显示四行摘要，点击对应纸页后展开全文，再次点击可收起。",
